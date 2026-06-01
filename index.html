@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Collier Connect - Wireframe Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #FAFAF7; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: #222;
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.005em;
+  }
+  button { font-family: inherit; }
+  input, textarea, select { font-family: inherit; color: #222; }
+  /* Caveat used inline for handwritten headings */
+  /* Subtle hatched edges */
+  @keyframes sdrise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes homepulse {
+  0%   { transform: scale(0.8); opacity: 0.55; }
+  70%  { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 5px rgba(212,160,23,0.3); }
+    50% { box-shadow: 0 0 0 9px rgba(212,160,23,0.15); }
+  }
+  @keyframes onbspin { to { transform: rotate(360deg); } }
+  .onb-spin { animation: onbspin 0.9s linear infinite; }
+  @keyframes onbpop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  .onb-pop { animation: onbpop 650ms ease-out both; }
+  .onb-pop-big { animation: onbpop 520ms cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes tourpulse { 0% { box-shadow: 0 0 0 2px rgba(31,56,100,0.55); } 70% { box-shadow: 0 0 0 16px rgba(31,56,100,0); } 100% { box-shadow: 0 0 0 16px rgba(31,56,100,0); } }
+  .tour-pulse { animation: tourpulse 1.3s ease-out infinite; }
+  *:focus-visible {
+    outline: 2px solid #1F3864;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #BFBFBF; border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#1F3864">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#1F3864" />
+    <circle cx="600" cy="400" r="230" fill="none" stroke="#D4A017" stroke-width="18" />
+    <circle cx="600" cy="300" r="58" fill="#D4A017" />
+    <circle cx="470" cy="470" r="48" fill="#FAFAF7" />
+    <circle cx="730" cy="470" r="48" fill="#FAFAF7" />
+    <line x1="600" y1="350" x2="490" y2="440" stroke="#FAFAF7" stroke-width="14" stroke-linecap="round" />
+    <line x1="600" y1="350" x2="710" y2="440" stroke="#FAFAF7" stroke-width="14" stroke-linecap="round" />
+    <line x1="490" y1="470" x2="710" y2="470" stroke="#FAFAF7" stroke-width="14" stroke-linecap="round" />
+  </svg>
+</template>
+<div id="root"></div>
+
+<!-- React + Babel (pinned versions) -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Data + tweaks panel -->
+<script src="data.js"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<!-- Store + shared components -->
+<script type="text/babel" src="store.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+
+<!-- Screens -->
+<script type="text/babel" src="screens/Onboarding.jsx"></script>
+<script type="text/babel" src="screens/Tour.jsx"></script>
+<script type="text/babel" src="screens/Tips.jsx"></script>
+<script type="text/babel" src="screens/Home.jsx"></script>
+<script type="text/babel" src="screens/WhatsHappening.jsx"></script>
+<script type="text/babel" src="screens/WhatsBeingDecided.jsx"></script>
+<script type="text/babel" src="screens/SpeakUp.jsx"></script>
+<script type="text/babel" src="screens/SpeakUpEngage.jsx"></script>
+<script type="text/babel" src="screens/Me.jsx"></script>
+<script type="text/babel" src="screens/Responses.jsx"></script>
+<script type="text/babel" src="screens/Guidelines.jsx"></script>
+<script type="text/babel" src="screens/EventRequest.jsx"></script>
+
+<!-- App shell -->
+<script type="text/babel" src="App.jsx"></script>
+
+<!-- Mount with tweaks panel -->
+<script type="text/babel" data-presets="env,react">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "layout": "desktop",
+  "responsePromince": "huge",
+  "archetype": "Newcomer",
+  "skipLink": false,
+  "highContrast": false,
+  "engages": true
+}/*EDITMODE-END*/;
+
+function Root() {
+  const [t, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
+  // Expose tweaks globally
+  window.CC_TWEAKS = t;
+  const store = window.useStore();
+
+  // Mirror tweaks into store ONLY when the tweak actually changes (not on mount),
+  // so the onboarding quiz result / persisted choice isn't clobbered on load.
+  const archMounted = React.useRef(false);
+  React.useEffect(() => {
+    if (!archMounted.current) { archMounted.current = true; return; }
+    if (store.state.archetype !== t.archetype) {
+      store.dispatch({ type: 'SET_ARCHETYPE', value: t.archetype });
+    }
+  }, [t.archetype]);
+  const engMounted = React.useRef(false);
+  React.useEffect(() => {
+    if (!engMounted.current) { engMounted.current = true; return; }
+    if (store.state.engagesOptedIn !== t.engages) {
+      store.dispatch({ type: 'SET_ENGAGES', value: t.engages });
+    }
+  }, [t.engages]);
+
+  return (
+    <>
+      <window.AppRoot />
+      <window.TweaksPanel title="Tweaks">
+        <window.TweakSection label="Layout" />
+        <window.TweakRadio label="Form factor" value={t.layout}
+          options={[{ value: 'mobile', label: 'Mobile' }, { value: 'desktop', label: 'Desktop' }]}
+          onChange={v => setTweak('layout', v)} />
+
+        <window.TweakSection label="Response loop" />
+        <window.TweakRadio label="Prominence" value={t.responsePromince}
+          options={[{ value: 'huge', label: 'Huge' }, { value: 'compact', label: 'Compact' }, { value: 'ticker', label: 'Ticker' }]}
+          onChange={v => setTweak('responsePromince', v)} />
+
+        <window.TweakSection label="Personalization" />
+        <window.TweakSelect label="Archetype" value={t.archetype}
+          options={[
+            { value: 'Civic Champion', label: 'Civic Champion' },
+            { value: 'Newcomer', label: 'Newcomer' },
+            { value: 'Quiet Supporter', label: 'Quiet Supporter' },
+            { value: 'Event-Goer', label: 'Event-Goer' },
+            { value: 'Watchdog', label: 'Watchdog' }
+          ]}
+          onChange={v => setTweak('archetype', v)} />
+        <window.TweakToggle label="Engages opted in" value={t.engages} onChange={v => setTweak('engages', v)} />
+
+        <window.TweakSection label="Accessibility" />
+        <window.TweakToggle label="Skip-to-content link" value={t.skipLink} onChange={v => setTweak('skipLink', v)} />
+        <window.TweakToggle label="High-contrast filter" value={t.highContrast} onChange={v => setTweak('highContrast', v)} />
+
+        <window.TweakSection label="Prototype state" />
+        <window.TweakButton onClick={() => { if (confirm('Start over from the very beginning?\n\nThis wipes everything - onboarding, submitted tickets, follows, and points - and returns you to the first-run Welcome screen, before any onboarding.')) { store.dispatch({ type: 'RESET' }); } }}>
+          ↺ Restart from the beginning
+        </window.TweakButton>
+      </window.TweaksPanel>
+    </>
+  );
+}
+
+function Boot() {
+  return (
+    <window.StoreProvider>
+      <Root />
+    </window.StoreProvider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Boot />);
+</script>
+</body>
+</html>
