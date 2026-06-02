@@ -359,7 +359,7 @@ function DesktopHomeLayout() {
     <div style={{ padding: '32px 32px 80px' }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 30, fontWeight: 700, color: '#1F3864', lineHeight: 1.2 }}>Hi Jane.</div>
-        <div style={{ fontSize: 15, color: '#595959', marginTop: 4 }}>{state.user.neighborhood} neighborhood · {state.archetype}</div>
+        <div style={{ fontSize: 15, color: '#595959', marginTop: 4 }}>{state.user.neighborhood} neighborhood · <span aria-hidden="true">{(D.avatars[state.avatar] || D.avatars[(D.archetypeToAvatar||{})[state.archetype]] || D.avatars['Just Getting Started']).emoji}</span> {state.avatar || (D.archetypeToAvatar||{})[state.archetype] || 'Just Getting Started'}</div>
       </div>
 
       <div style={{ marginBottom: 20, marginLeft: -18, marginRight: -18 }}>
@@ -401,7 +401,7 @@ function DesktopHomeLayout() {
         </div>
       )}
 
-      <SectionH sub={`tuned to your archetype: ${state.archetype.toLowerCase()}`}>For you</SectionH>
+      <SectionH sub={`tuned to your avatar: ${state.avatar || (D.archetypeToAvatar||{})[state.archetype] || 'Just Getting Started'}`}>For you</SectionH>
       <div data-tour="foryou" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
         {items.map((item, i) => <window.ForYouCard key={i} item={item} />)}
       </div>

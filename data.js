@@ -678,6 +678,88 @@ window.CC_DATA = (function () {
 
   const neighborhoods = ['Beechmont', 'Ewingsville', 'Fort Pitt', 'Hickman', 'Kirwan Heights', 'Nevillewood', 'Presto', 'Rennerdale', 'Walkers Mill'];
 
+  // === Onboarding quiz: the 5 resident avatars ============================
+  // Visible identity assigned by the 8-question quiz. Each maps to an existing
+  // personalization archetype (used by the For You feed, tour, and notifications)
+  // and carries a preferred event-category order for the reveal screen.
+  const avatars = {
+    'Leading Lion': {
+      key: 'Leading Lion', emoji: '\uD83E\uDD81', percent: 8, archetype: 'Civic Champion',
+      desc: 'You\u0027re a civic leader who shows up and speaks up. You attend meetings, advocate for important issues, and help shape our community\u0027s future. Your voice matters and makes a difference.',
+      recs: [
+        'Attend Manager\u0027s Coffee Hours for direct dialogue',
+        'Join the Planning Commission or Zoning Hearing Board',
+        'Share your expertise at Board of Commissioners Meetings',
+        'Connect with other civic leaders in the community'
+      ],
+      eventCats: ['civic']
+    },
+    'Busy Bee': {
+      key: 'Busy Bee', emoji: '\uD83D\uDC1D', percent: 12, archetype: 'Event-Goer',
+      desc: 'You\u0027re always in motion in the community. You volunteer, help out at events, and pitch in where the township needs hands. Collier runs better because of people like you.',
+      recs: [
+        'Sign up for Clean Up Day and volunteer events',
+        'Help organize Concerts in the Park or the Spring Craft Show',
+        'Join the Parks and Recreation volunteer roster',
+        'Connect with other volunteers through the township directory'
+      ],
+      eventCats: ['civic', 'family', 'youth']
+    },
+    'Social Butterfly': {
+      key: 'Social Butterfly', emoji: '\uD83E\uDD8B', percent: 35, archetype: 'Event-Goer',
+      desc: 'You love the community side of Collier. You show up to concerts, festivals, and family events, and you keep the township connected through your social presence. You make Collier feel like home.',
+      recs: [
+        'Browse the events calendar for upcoming concerts and festivals',
+        'Follow Collier\u0027s social channels for event announcements',
+        'Bring friends and family to community gatherings',
+        'Share your favorite Collier moments with neighbors'
+      ],
+      eventCats: ['family', 'youth', 'civic']
+    },
+    'Mystical Dragon': {
+      key: 'Mystical Dragon', emoji: '\uD83D\uDC09', percent: 5, archetype: 'Watchdog',
+      desc: 'You\u0027re an independent voice in the community. You engage on your own terms, often through online discussions and unconventional channels. You bring a different perspective that the township needs to hear.',
+      recs: [
+        'Submit ideas or feedback through the Speak Up section',
+        'Comment on township proposals during public comment periods',
+        'Share your perspective in online community discussions',
+        'Email staff directly with questions or concerns'
+      ],
+      eventCats: []
+    },
+    'Just Getting Started': {
+      key: 'Just Getting Started', emoji: '\uD83D\uDE48', percent: 40, archetype: 'Newcomer',
+      desc: 'You\u0027re new to engaging with Collier, and that\u0027s okay. There\u0027s no wrong way to start. Even reading this and taking the quiz is a step. We\u0027re glad you\u0027re here.',
+      recs: [
+        'Browse the events calendar to find something that interests you',
+        'Sign up for the monthly newsletter to stay informed',
+        'Try attending one event to see what Collier is about',
+        'Follow a topic you care about to get updates that matter to you'
+      ],
+      eventCats: []
+    }
+  };
+  // Comparison-chart row order (top to bottom), verbatim from the spec.
+  const avatarComparisonOrder = ['Busy Bee', 'Leading Lion', 'Social Butterfly', 'Mystical Dragon', 'Just Getting Started'];
+  // Reverse lookup so the Me section can show an avatar even for a seeded archetype.
+  const archetypeToAvatar = { 'Civic Champion': 'Leading Lion', 'Event-Goer': 'Social Butterfly', 'Watchdog': 'Mystical Dragon', 'Newcomer': 'Just Getting Started', 'Quiet Supporter': 'Just Getting Started' };
+
+  // Seeded events shown on the reveal screen (reordered per avatar at render time).
+  const quizEvents = [
+    { id: 'qe1', name: 'Manager\u0027s Coffee Hour', category: 'civic', date: 'May 20, 2026', time: '9:30 AM', location: 'Township Building', description: 'Meet with township leadership in an informal setting. Ask questions, share ideas, and learn about current initiatives.' },
+    { id: 'qe2', name: 'Concerts in the Park', category: 'family', date: 'June through August 2026', time: 'Thursday evenings', location: 'Collier Community Park', description: 'Free live music all summer long. Bring your lawn chairs and enjoy family-friendly entertainment.' },
+    { id: 'qe3', name: 'Summer Camp Programs', category: 'youth', date: 'June through August 2026', time: 'Weekdays', location: 'Various locations', description: 'Fun, educational programs for kids of all ages. Sports, arts, crafts, and more.' },
+    { id: 'qe4', name: 'Manager\u0027s Coffee Hour', category: 'civic', date: 'August 19, 2026', time: '9:30 AM', location: 'Township Building', description: 'Meet with township leadership in an informal setting.' }
+  ];
+  const quizEventCatColors = { civic: '#1F3864', family: '#7030A0', youth: '#548235' };
+
+  // Recurring township meetings shown on the reveal screen.
+  const regularMeetings = [
+    { name: 'Board of Commissioners Meetings', schedule: '2nd and 4th Wednesday, 7:00 PM', description: 'Official township business meetings open to the public.' },
+    { name: 'Planning Commission', schedule: '3rd Tuesday, 7:00 PM', description: 'Review development plans and make recommendations.' },
+    { name: 'Zoning Hearing Board', schedule: 'As needed', description: 'Hear appeals and requests for zoning variances.' }
+  ];
+
   // Household counts (official township records) used for per-household leaderboard scoring.
   const householdCounts = {
     'Beechmont': 310, 'Ewingsville': 290, 'Fort Pitt': 195, 'Hickman': 220, 'Kirwan Heights': 420,
@@ -928,6 +1010,7 @@ window.CC_DATA = (function () {
     leaderboard, individualLeaderboard, activityLog, followedItems,
     pollSeed, user, notifications, householdCounts,
     likertSets, helpfulSet, valueCopy, speakUpOpportunities, speakUpRecent, earnActivities, completedActivityIds,
-    forYouFeeds, validZips, tourUniversal, tourByArchetype, contextualTips
+    forYouFeeds, validZips, tourUniversal, tourByArchetype, contextualTips,
+    avatars, avatarComparisonOrder, archetypeToAvatar, quizEvents, quizEventCatColors, regularMeetings
   };
 })();

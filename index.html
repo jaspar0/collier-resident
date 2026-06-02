@@ -103,7 +103,7 @@
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "layout": "desktop",
   "responsePromince": "huge",
-  "archetype": "Newcomer",
+  "avatar": "Just Getting Started",
   "skipLink": false,
   "highContrast": false,
   "engages": true
@@ -117,13 +117,13 @@ function Root() {
 
   // Mirror tweaks into store ONLY when the tweak actually changes (not on mount),
   // so the onboarding quiz result / persisted choice isn't clobbered on load.
-  const archMounted = React.useRef(false);
+  const avMounted = React.useRef(false);
   React.useEffect(() => {
-    if (!archMounted.current) { archMounted.current = true; return; }
-    if (store.state.archetype !== t.archetype) {
-      store.dispatch({ type: 'SET_ARCHETYPE', value: t.archetype });
+    if (!avMounted.current) { avMounted.current = true; return; }
+    if (store.state.avatar !== t.avatar) {
+      store.dispatch({ type: 'SET_AVATAR', value: t.avatar });
     }
-  }, [t.archetype]);
+  }, [t.avatar]);
   const engMounted = React.useRef(false);
   React.useEffect(() => {
     if (!engMounted.current) { engMounted.current = true; return; }
@@ -147,15 +147,15 @@ function Root() {
           onChange={v => setTweak('responsePromince', v)} />
 
         <window.TweakSection label="Personalization" />
-        <window.TweakSelect label="Archetype" value={t.archetype}
+        <window.TweakSelect label="Avatar" value={t.avatar}
           options={[
-            { value: 'Civic Champion', label: 'Civic Champion' },
-            { value: 'Newcomer', label: 'Newcomer' },
-            { value: 'Quiet Supporter', label: 'Quiet Supporter' },
-            { value: 'Event-Goer', label: 'Event-Goer' },
-            { value: 'Watchdog', label: 'Watchdog' }
+            { value: 'Leading Lion', label: '\uD83E\uDD81 Leading Lion' },
+            { value: 'Busy Bee', label: '\uD83D\uDC1D Busy Bee' },
+            { value: 'Social Butterfly', label: '\uD83E\uDD8B Social Butterfly' },
+            { value: 'Mystical Dragon', label: '\uD83D\uDC09 Mystical Dragon' },
+            { value: 'Just Getting Started', label: '\uD83D\uDE48 Just Getting Started' }
           ]}
-          onChange={v => setTweak('archetype', v)} />
+          onChange={v => setTweak('avatar', v)} />
         <window.TweakToggle label="Engages opted in" value={t.engages} onChange={v => setTweak('engages', v)} />
 
         <window.TweakSection label="Accessibility" />

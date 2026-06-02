@@ -15,8 +15,10 @@ function MeSection() {
 
 function MeLanding() {
   const { state, dispatch, nav } = window.useStore();
-  const { SketchyCard, Icon } = window.CC_UI;
+  const { SketchyCard, SketchyButton, Icon } = window.CC_UI;
   const D = window.CC_DATA;
+  const avatarKey = state.avatar || (D.archetypeToAvatar && D.archetypeToAvatar[state.archetype]) || 'Just Getting Started';
+  const av = D.avatars[avatarKey] || D.avatars['Just Getting Started'];
   const issueCount = D.tickets.filter(t => t.owner === 'Jane').length + state.submittedTickets.length;
   const requestCount = D.eventRequests.length + state.submittedEventRequests.length;
   const followedCount = Object.keys(state.followed).length;
@@ -37,9 +39,24 @@ function MeLanding() {
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#1F3864', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, border: '2.5px solid #222' }}>{state.user.initial}</div>
         <div>
           <div style={{ fontSize: 30, color: '#1F3864', fontWeight: 700, lineHeight: 1.2 }}>{state.user.name}</div>
-          <div style={{ fontSize: 13, color: '#595959' }}>{state.user.neighborhood} · {state.archetype} archetype</div>
+          <div style={{ fontSize: 13, color: '#595959' }}>{state.user.neighborhood} · <span aria-hidden="true">{av.emoji}</span> {av.key}</div>
           <div style={{ fontSize: 12, color: '#595959' }}>Member since {state.user.memberSince}</div>
         </div>
+      </div>
+
+      {/* My Avatar */}
+      <div style={{ marginBottom: 18, padding: 16, background: '#DBE5F1', border: '1.8px solid #1F3864', borderRadius: '14px 18px 14px 19px / 16px 14px 18px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 10 }}>
+          <div style={{ fontSize: 52, lineHeight: 1, flexShrink: 0 }} aria-hidden="true">{av.emoji}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, color: '#1F3864', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 800, opacity: 0.7 }}>My Avatar</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#1F3864', lineHeight: 1.15 }}>{av.key}</div>
+          </div>
+          <SketchyButton small icon="refresh" onClick={() => nav({ name: 'onboarding', step: 2 })}>Retake</SketchyButton>
+        </div>
+        <div style={{ fontSize: 13.5, color: '#243a5e', lineHeight: 1.55, marginBottom: 14 }}>{av.desc}</div>
+        <div style={{ fontSize: 11, color: '#1F3864', textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 800, marginBottom: 10 }}>How you compare</div>
+        {window.AvatarComparisonChart && <window.AvatarComparisonChart current={av.key} />}
       </div>
 
       {/* Badges showcase */}

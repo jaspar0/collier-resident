@@ -4,39 +4,92 @@
 // Phase 3 (tour) and Phase 5 (celebration) live in Tour.jsx, triggered from the tour-intro here.
 const { useState: useOnb, useRef: useOnbRef, useEffect: useOnbEffect } = React;
 
-// ── Quiz definition ──────────────────────────────────────────────────────────
-const Q5OPTS = {
-  speak: 'I show up and speak up',
-  quiet: 'I quietly stay informed',
-  newish: 'I\u0027m new and learning',
-  more: 'I want to do more',
-  know: 'I just need to know what\u0027s going on'
-};
-const ONB_QUIZ = [
-{ q: 'How do you usually find out what\u0027s happening in Collier?', opts: ['Facebook', 'From a neighbor', 'Township website', 'Mailer', 'I don\u0027t usually'] },
-{ q: 'How often do you currently engage with township government?', opts: ['Never', 'A few times a year', 'Monthly', 'Weekly'] },
-{ q: 'What matters most to you right now?', multi: true, opts: ['Roads and traffic', 'Parks and recreation', 'Schools and family', 'Taxes and budget', 'Safety and police', 'Trails and environment', 'Senior services', 'Other'] },
-{ q: 'How do you like to be contacted?', opts: ['Email', 'Text', 'Phone call', 'Printed mail', 'Don\u0027t contact me'] },
-{ q: 'How would you describe your involvement in your community?', opts: [Q5OPTS.speak, Q5OPTS.quiet, Q5OPTS.newish, Q5OPTS.more, Q5OPTS.know] }];
+// ── Avatar quiz definition (8 questions) ──────────────────────────────────────
+// Scoring keys: LL Leading Lion, BB Busy Bee, SB Social Butterfly, MD Mystical Dragon, JGS Just Getting Started
+const AVATAR_KEYMAP = { LL: 'Leading Lion', BB: 'Busy Bee', SB: 'Social Butterfly', MD: 'Mystical Dragon', JGS: 'Just Getting Started' };
+const AVATAR_QUIZ = [
+  { type: 'single', pct: 13, q: 'How often do you attend township events?', other: true, opts: [
+    { label: 'Multiple times a month', s: { LL: 3, BB: 3, SB: 2 } },
+    { label: 'Around once a month', s: { LL: 2, BB: 2, SB: 2 } },
+    { label: 'Every few months', s: { SB: 2, MD: 1 } },
+    { label: 'Once a year', s: { JGS: 2, MD: 1 } },
+    { label: 'Very rarely or never', s: { JGS: 3 } }
+  ] },
+  { type: 'multi', pct: 25, q: 'What are your favorite Collier Township events to attend?', other: true, opts: [
+    { label: 'Concerts in the Park', s: { SB: 2 } },
+    { label: 'Spring Craft Show', s: { SB: 2, BB: 1 } },
+    { label: 'Family Events', s: { SB: 2 } },
+    { label: 'Senior Activities', s: { SB: 1, BB: 1 } },
+    { label: 'Clean Up Day', s: { BB: 3 } },
+    { label: 'Sports and Recreation', s: { BB: 2, SB: 1 } },
+    { label: 'Kids Programs', s: { SB: 2, BB: 1 } },
+    { label: 'Community Meetings', s: { LL: 3 } },
+    { label: 'Holiday Events', s: { SB: 2 } },
+    { label: 'I haven\u0027t gone to these events', s: { JGS: 3 }, exclusive: true }
+  ] },
+  { type: 'multi', pct: 38, q: 'How do you keep up with township news?', other: true, opts: [
+    { label: 'Social media', s: { SB: 1, MD: 1 } },
+    { label: 'Newsletters', s: { LL: 1, SB: 1 } },
+    { label: 'Website', s: { LL: 1 } },
+    { label: 'Signs and posters', s: { JGS: 1, SB: 1 } },
+    { label: 'Word of mouth', s: { JGS: 1, MD: 1 } },
+    { label: 'Town hall meetings', s: { LL: 3 } },
+    { label: 'Manager\u0027s Coffee', s: { LL: 3 } },
+    { label: 'I usually don\u0027t', s: { JGS: 3 }, exclusive: true }
+  ] },
+  { type: 'multi', pct: 50, q: 'What social platforms do you use to engage with Collier?', other: true, opts: [
+    { label: 'Facebook', s: { SB: 2 } },
+    { label: 'Instagram', s: { SB: 2 } },
+    { label: 'Nextdoor', s: { SB: 1, BB: 1 } },
+    { label: 'Reddit', s: { MD: 4 } },
+    { label: 'Email', s: { LL: 1 } },
+    { label: 'None', s: { JGS: 2 }, exclusive: true }
+  ] },
+  { type: 'single', pct: 63, q: 'How do you engage on Collier Township social media channels?', other: true, opts: [
+    { label: 'Read only', s: { JGS: 1, SB: 1 } },
+    { label: 'React or like', s: { SB: 2 } },
+    { label: 'Comment', s: { SB: 2, MD: 1 } },
+    { label: 'Post or share', s: { SB: 3, MD: 2 } },
+    { label: 'Don\u0027t engage', s: { JGS: 2 } }
+  ] },
+  { type: 'multi', pct: 75, q: 'How do you make your voice heard?', other: true, opts: [
+    { label: 'Attend meetings', s: { LL: 3 } },
+    { label: 'Speak at meetings', s: { LL: 4 } },
+    { label: 'Manager\u0027s Coffee', s: { LL: 3 } },
+    { label: 'Email or call staff', s: { LL: 2, MD: 1 } },
+    { label: 'Volunteer', s: { BB: 4 } },
+    { label: 'Social media discussions', s: { SB: 2, MD: 2 } },
+    { label: 'I usually don\u0027t participate', s: { JGS: 4 }, exclusive: true }
+  ] },
+  { type: 'dropdown', pct: 88, q: 'What neighborhood do you live in?', placeholder: 'Select your neighborhood...',
+    opts: ['Beechmont', 'Ewingsville', 'Fort Pitt', 'Hickman', 'Kirwan Heights', 'Nevillewood', 'Presto', 'Rennerdale', 'Walkers Mill', 'Prefer not to say'] },
+  { type: 'text', pct: 100, q: 'What would make Collier Township better for you?',
+    placeholder: 'Share your thoughts. This helps the township understand what matters most to you.',
+    note: 'Your response is shared anonymously with township staff.' }
+];
 
+// Highest total wins; ties resolve by this priority order.
+const AVATAR_TIE_ORDER = ['Leading Lion', 'Busy Bee', 'Mystical Dragon', 'Social Butterfly', 'Just Getting Started'];
 
-function computeArchetype(answers) {
-  const q5 = answers[4];
-  const topics = answers[2] || [];
-  const has = (t) => topics.includes(t);
-  const social = has('Parks and recreation') || has('Schools and family');
-  const accountability = has('Safety and police') || has('Taxes and budget');
-  if (q5 === Q5OPTS.speak) return 'Civic Champion';
-  if (q5 === Q5OPTS.quiet || q5 === Q5OPTS.know) return 'Quiet Supporter';
-  if (q5 === Q5OPTS.newish) return social && !accountability ? 'Event-Goer' : 'Newcomer';
-  if (q5 === Q5OPTS.more) {
-    if (accountability) return 'Watchdog';
-    if (social) return 'Event-Goer';
-    return 'Civic Champion';
-  }
-  return 'Newcomer';
+function scoreQuiz(answers) {
+  const totals = { 'Leading Lion': 0, 'Busy Bee': 0, 'Social Butterfly': 0, 'Mystical Dragon': 0, 'Just Getting Started': 0 };
+  AVATAR_QUIZ.forEach((q, i) => {
+    if (q.type === 'dropdown' || q.type === 'text') return;
+    const a = answers[i];
+    if (a == null) return;
+    const selected = q.type === 'multi' ? (a || []) : [a];
+    selected.forEach(label => {
+      const opt = q.opts.find(o => o.label === label);
+      if (opt && opt.s) Object.keys(opt.s).forEach(k => { totals[AVATAR_KEYMAP[k]] += opt.s[k]; });
+    });
+  });
+  let best = 'Just Getting Started', bestScore = -1;
+  AVATAR_TIE_ORDER.forEach(name => { if (totals[name] > bestScore) { best = name; bestScore = totals[name]; } });
+  if (bestScore <= 0) return 'Just Getting Started';
+  return best;
 }
 
+// Retained for the (now-skipped) topic/notification steps if ever routed to.
 const TOPIC_MAP = {
   'Roads and traffic': 'Road and Traffic', 'Parks and recreation': 'Parks and Recreation',
   'Schools and family': 'Family events', 'Trails and environment': 'Trails and environment',
@@ -76,7 +129,7 @@ function Onboarding() {
   const [neighborhood, setNeighborhood] = useOnb(window.CC_DATA.user.neighborhood);
   const [namePref, setNamePref] = useOnb('resident');
   const [answers, setAnswers] = useOnb({});
-  const [archetype, setArchetype] = useOnb('Newcomer');
+  const [avatar, setAvatar] = useOnb('Just Getting Started');
 
   const go = (s) => setScreen(s);
 
@@ -90,14 +143,14 @@ function Onboarding() {
     case 'neighborhood':return <NeighborhoodPick neighborhood={neighborhood} setNeighborhood={setNeighborhood} {...common} />;
     case 'displayname':return <DisplayNamePick namePref={namePref} setNamePref={setNamePref} neighborhood={neighborhood} {...common} />;
     case 'loading1':return <Interlude text="Setting up your account..." onDone={() => go('quizintro')} />;
-    case 'quizintro':return <QuizIntro {...common} />;
-    case 'quiz':return <QuizFlow answers={answers} setAnswers={setAnswers} onDone={(arc) => {setArchetype(arc);dispatch({ type: 'SET_ARCHETYPE', value: arc });go('computing');}} {...common} />;
-    case 'computing':return <Interlude text="Figuring out your archetype..." onDone={() => go('reveal')} />;
-    case 'reveal':return <ArchetypeReveal archetype={archetype} {...common} />;
-    case 'topics':return <TopicPrefs archetype={archetype} answers={answers} {...common} />;
-    case 'notif':return <NotifPrefs archetype={archetype} {...common} />;
+    case 'quizintro':return <AvatarQuizWelcome {...common} />;
+    case 'quiz':return <AvatarQuizFlow answers={answers} setAnswers={setAnswers} neighborhood={neighborhood} onDone={(av, feedback) => {setAvatar(av);dispatch({ type: 'SET_AVATAR', value: av });if (feedback != null) dispatch({ type: 'SET_QUIZ_FEEDBACK', value: feedback });go('computing');}} {...common} />;
+    case 'computing':return <Interlude text="Calculating your avatar..." onDone={() => go('reveal')} />;
+    case 'reveal':return <AvatarReveal avatar={avatar} {...common} />;
+    case 'topics':return <TopicPrefs archetype={state.archetype} answers={answers} {...common} />;
+    case 'notif':return <NotifPrefs archetype={state.archetype} {...common} />;
     case 'engages':return <EngagesOptIn {...common} />;
-    case 'tourintro':return <TourIntro archetype={archetype} {...common} />;
+    case 'tourintro':return <TourIntro avatar={avatar} {...common} />;
     default:return <Welcome {...common} />;
   }
 }
@@ -365,98 +418,298 @@ function Interlude({ text, onDone }) {
 
 }
 
-// ── Phase 2.1 Quiz intro ─────────────────────────────────────────────────────────
-function QuizIntro({ go, retake, dispatch }) {
+// ── Phase 2.1 Avatar quiz welcome ─────────────────────────────────────────────────
+function AvatarQuizWelcome({ go, retake, nav }) {
   const { SketchyButton } = window.CC_UI;
+  const bullets = [
+    { glyph: <polygon points="14,3 25,22 3,22" />, text: 'Discover your unique resident personality' },
+    { glyph: <circle cx="14" cy="13" r="10" />, text: 'Get events tailored to your interests' },
+    { glyph: <rect x="5" y="5" width="18" height="18" rx="3" transform="rotate(45 14 14)" />, text: 'Connect with your community' }
+  ];
   return (
-    <Frame back={retake ? null : () => go('displayname')}>
-      <H1>Quick: what kind of resident are you?</H1>
-      <Sub>5 questions, takes 2 minutes. Helps us send you things you will actually care about.</Sub>
-      <div style={{ marginTop: 16, padding: 14, background: '#FFF4D6', border: '1.5px solid #D4A017', borderRadius: 10, fontSize: 14, color: '#7A5A00', lineHeight: 1.5 }}>
-        After this, we will personalize your tour, your feed, and your notification defaults.
+    <Frame back={retake ? () => nav({ name: 'me', sub: 'profile' }) : () => go('displayname')}>
+      <div style={{ textAlign: 'center', marginTop: 6 }}>
+        <div style={{ fontSize: 56, lineHeight: 1, marginBottom: 14 }} aria-hidden="true">{'\uD83E\uDD81\uD83D\uDC1D\uD83E\uDD8B'}</div>
+        <div style={{ fontSize: 28, fontWeight: 800, color: '#1F3864', lineHeight: 1.18, letterSpacing: '-0.015em', textWrap: 'balance' }}>What Kind of Collier Resident Are You?</div>
+        <div style={{ fontSize: 16, color: '#595959', marginTop: 12, lineHeight: 1.5, textWrap: 'pretty' }}>Take this 2-minute quiz to discover your Collier avatar and get personalized community updates.</div>
       </div>
-      <div style={{ marginTop: 22 }}>
-        <SketchyButton primary onClick={() => go('quiz')} style={{ width: '100%', justifyContent: 'center' }}>Take the quiz</SketchyButton>
+      <div style={{ display: 'grid', gap: 10, marginTop: 26 }}>
+        {bullets.map((b, i) => (
+          <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'center', textAlign: 'left', padding: '12px 16px', border: '1.5px solid #222', borderRadius: '12px 14px 11px 13px', background: '#FFF' }}>
+            <div style={{ flexShrink: 0, width: 40, height: 40, borderRadius: '50%', background: '#DBE5F1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="22" height="22" viewBox="0 0 28 28" fill="none" stroke="#1F3864" strokeWidth="2" strokeLinejoin="round">{b.glyph}</svg>
+            </div>
+            <div style={{ fontSize: 15.5, color: '#222', fontWeight: 500 }}>{b.text}</div>
+          </div>
+        ))}
       </div>
-      {!retake && <a href="#" onClick={(e) => {e.preventDefault();dispatch({ type: 'SET_ARCHETYPE', value: 'Newcomer' });go('engages');}} style={{ display: 'block', marginTop: 16, color: '#2E74B5', fontSize: 14, textAlign: 'center' }}>Skip for now (you will get the generic experience)</a>}
+      <div style={{ marginTop: 26 }}>
+        <SketchyButton primary onClick={() => go('quiz')} style={{ width: '100%', justifyContent: 'center' }}>Start Quiz</SketchyButton>
+      </div>
+      <a href="#" onClick={(e) => { e.preventDefault(); if (retake) { nav({ name: 'me', sub: 'profile' }); } else { go('engages'); } }} style={{ display: 'block', marginTop: 16, color: '#2E74B5', fontSize: 14, textAlign: 'center' }}>Skip for now</a>
     </Frame>);
 
 }
 
-// ── Phase 2.2-2.6 Quiz ─────────────────────────────────────────────────────────
-function QuizFlow({ answers, setAnswers, onDone, go, retake }) {
+// ── Phase 2.2 Avatar quiz (8 questions) ───────────────────────────────────────
+function AvatarQuizFlow({ answers, setAnswers, neighborhood, onDone, go }) {
   const { SketchyButton } = window.CC_UI;
   const [idx, setIdx] = useOnb(0);
-  const q = ONB_QUIZ[idx];
-  const select = (opt) => {
-    if (q.multi) {
-      const cur = answers[idx] || [];
-      setAnswers({ ...answers, [idx]: cur.includes(opt) ? cur.filter((x) => x !== opt) : [...cur, opt] });
-    } else setAnswers({ ...answers, [idx]: opt });
+  const [otherText, setOtherText] = useOnb({});   // qIndex -> text
+  const q = AVATAR_QUIZ[idx];
+  const OTHER = 'Other';
+
+  // Seed neighborhood dropdown from the earlier account step on first view.
+  useOnbEffect(() => {
+    if (q.type === 'dropdown' && answers[idx] == null && neighborhood) {
+      setAnswers(a => ({ ...a, [idx]: neighborhood }));
+    }
+  }, [idx]);
+
+  const selectSingle = (label) => setAnswers({ ...answers, [idx]: label });
+  const selectMulti = (opt) => {
+    const cur = answers[idx] || [];
+    const isExcl = (q.opts.find(o => o.label === opt) || {}).exclusive;
+    let next;
+    if (cur.includes(opt)) next = cur.filter(x => x !== opt);
+    else if (isExcl) next = [opt];                                   // exclusive clears the rest
+    else next = [...cur.filter(x => !((q.opts.find(o => o.label === x) || {}).exclusive)), opt]; // selecting any clears an exclusive
+    setAnswers({ ...answers, [idx]: next });
   };
-  const answered = q.multi ? answers[idx] && answers[idx].length > 0 : !!answers[idx];
-  const next = () => {if (idx < ONB_QUIZ.length - 1) setIdx(idx + 1);else onDone(computeArchetype(answers));};
-  const prev = () => {if (idx > 0) setIdx(idx - 1);else go('quizintro');};
+
+  const isSel = (label) => q.type === 'multi' ? (answers[idx] || []).includes(label) : answers[idx] === label;
+
+  // Next-enabled rule: single + dropdown require a choice; multi + text always allowed.
+  const answered = (() => {
+    if (q.type === 'single') return !!answers[idx];
+    if (q.type === 'dropdown') return !!answers[idx] && answers[idx] !== '';
+    return true; // multi, text
+  })();
+
+  const last = idx === AVATAR_QUIZ.length - 1;
+  const next = () => {
+    if (!last) { setIdx(idx + 1); return; }
+    onDone(scoreQuiz(answers), answers[AVATAR_QUIZ.length - 1] || '');
+  };
+  const prev = () => { if (idx > 0) setIdx(idx - 1); else go('quizintro'); };
+
+  const otherSelected = isSel(OTHER);
 
   return (
-    <Frame back={prev}>
-      <div style={{ fontSize: 13, color: '#595959', marginBottom: 8, fontWeight: 600 }}>{idx + 1} of {ONB_QUIZ.length}</div>
-      <PhaseProgress pct={(idx + 1) / ONB_QUIZ.length * 100} />
-      <H1>{q.q}</H1>
-      {q.multi && <Sub>Check all that apply.</Sub>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
-        {q.opts.map((opt) => {
-          const sel = q.multi ? (answers[idx] || []).includes(opt) : answers[idx] === opt;
-          return (
-            <button key={opt} onClick={() => select(opt)} style={{ fontFamily: 'inherit', fontSize: 16, padding: '14px 16px', textAlign: 'left', background: sel ? '#DBE5F1' : '#FFF', color: '#222', border: sel ? '2px solid #1F3864' : '1.5px solid #222', borderRadius: '10px 13px 10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 22, height: 22, borderRadius: q.multi ? 4 : '50%', border: '2px solid #1F3864', display: 'flex', alignItems: 'center', justifyContent: 'center', background: sel ? '#1F3864' : 'transparent', flexShrink: 0 }}>
-                {sel && <span style={{ color: '#FFF', fontSize: 14 }}>✓</span>}
-              </div>
-              {opt}
-            </button>);
-
-        })}
+    <Frame back={idx > 0 ? prev : () => go('quizintro')}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+        <div style={{ fontSize: 13, color: '#595959', fontWeight: 700 }}>Question {idx + 1} of {AVATAR_QUIZ.length}</div>
+        <div style={{ fontSize: 13, color: '#1F3864', fontWeight: 700 }}>{q.pct}%</div>
       </div>
-      <div style={{ marginTop: 22 }}>
-        <SketchyButton primary disabled={!answered} onClick={next} style={{ width: '100%', justifyContent: 'center' }}>{idx === ONB_QUIZ.length - 1 ? 'See my archetype' : 'Next question'}</SketchyButton>
+      <PhaseProgress pct={q.pct} />
+      <H1>{q.q}</H1>
+      {q.type === 'multi' && <Sub>Select all that apply.</Sub>}
+
+      {/* Dropdown question */}
+      {q.type === 'dropdown' && (
+        <select value={answers[idx] || ''} onChange={(e) => selectSingle(e.target.value)} style={{ ...onbInput(false), marginTop: 18, cursor: 'pointer' }}>
+          <option value="">{q.placeholder}</option>
+          {q.opts.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      )}
+
+      {/* Open text question */}
+      {q.type === 'text' && (
+        <div style={{ marginTop: 16 }}>
+          <textarea value={answers[idx] || ''} onChange={(e) => setAnswers({ ...answers, [idx]: e.target.value.slice(0, 500) })} rows={5} placeholder={q.placeholder}
+            style={{ width: '100%', boxSizing: 'border-box', padding: 12, fontFamily: 'inherit', fontSize: 16, border: '1.8px solid #222', borderRadius: 8, background: '#FFF', resize: 'vertical', minHeight: 110 }} />
+          {q.note && <div style={{ fontSize: 12.5, color: '#595959', marginTop: 6, fontStyle: 'italic' }}>{q.note}</div>}
+        </div>
+      )}
+
+      {/* Choice questions */}
+      {(q.type === 'single' || q.type === 'multi') && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+          {q.opts.map(o => {
+            const sel = isSel(o.label);
+            const pick = () => q.type === 'multi' ? selectMulti(o.label) : selectSingle(o.label);
+            return (
+              <button key={o.label} onClick={pick} style={{ fontFamily: 'inherit', fontSize: 16, padding: '14px 16px', textAlign: 'left', background: sel ? '#DBE5F1' : '#FFF', color: '#222', border: sel ? '2px solid #1F3864' : '1.5px solid #222', borderRadius: '10px 13px 10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ width: 22, height: 22, borderRadius: q.type === 'multi' ? 4 : '50%', border: '2px solid #1F3864', display: 'flex', alignItems: 'center', justifyContent: 'center', background: sel ? '#1F3864' : 'transparent', flexShrink: 0 }}>
+                  {sel && <span style={{ color: '#FFF', fontSize: 14 }}>✓</span>}
+                </span>
+                {o.label}
+              </button>
+            );
+          })}
+          {/* Other with text input */}
+          {q.other && (
+            <button onClick={() => q.type === 'multi' ? selectMulti(OTHER) : selectSingle(OTHER)} style={{ fontFamily: 'inherit', fontSize: 16, padding: '14px 16px', textAlign: 'left', background: otherSelected ? '#DBE5F1' : '#FFF', color: '#222', border: otherSelected ? '2px solid #1F3864' : '1.5px solid #222', borderRadius: '10px 13px 10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ width: 22, height: 22, borderRadius: q.type === 'multi' ? 4 : '50%', border: '2px solid #1F3864', display: 'flex', alignItems: 'center', justifyContent: 'center', background: otherSelected ? '#1F3864' : 'transparent', flexShrink: 0 }}>
+                {otherSelected && <span style={{ color: '#FFF', fontSize: 14 }}>✓</span>}
+              </span>
+              Other
+            </button>
+          )}
+          {q.other && otherSelected && (
+            <input autoFocus value={otherText[idx] || ''} onChange={(e) => setOtherText({ ...otherText, [idx]: e.target.value })} placeholder="Tell us more (optional)"
+              style={{ ...onbInput(false), marginTop: -2 }} />
+          )}
+        </div>
+      )}
+
+      <div style={{ marginTop: 24 }}>
+        <SketchyButton primary disabled={!answered} onClick={next} style={{ width: '100%', justifyContent: 'center' }}>{last ? 'See My Results' : 'Next'}</SketchyButton>
       </div>
     </Frame>);
 
 }
 
-// ── Phase 2.7 Reveal ─────────────────────────────────────────────────────────────
-function ArchetypeReveal({ archetype, go, retake, nav, dispatch }) {
+// ── Shared: avatar comparison bar chart (reused on the Me section) ──────────────
+function AvatarComparisonChart({ current }) {
+  const D = window.CC_DATA;
+  return (
+    <div style={{ display: 'grid', gap: 10 }}>
+      {D.avatarComparisonOrder.map(name => {
+        const av = D.avatars[name];
+        const mine = name === current;
+        return (
+          <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontSize: 22, width: 26, textAlign: 'center', flexShrink: 0 }} aria-hidden="true">{av.emoji}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 13.5, color: '#222', fontWeight: mine ? 700 : 500 }}>{av.key}</span>
+                {mine && <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.4, color: '#FFF', background: '#1F3864', borderRadius: 4, padding: '1px 6px' }}>YOU</span>}
+                <span style={{ marginLeft: 'auto', fontSize: 13, color: '#595959', fontWeight: 700 }}>{av.percent}%</span>
+              </div>
+              <div style={{ height: 12, background: '#ECEFF3', borderRadius: 999, overflow: 'hidden' }}>
+                <div style={{ width: av.percent + '%', height: '100%', background: mine ? '#1F3864' : '#AEBED4', borderRadius: 999, transition: 'width 500ms ease' }} />
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>);
+}
+window.AvatarComparisonChart = AvatarComparisonChart;
+
+// ── Phase 2.7 Avatar reveal (comprehensive) ────────────────────────────────────
+function AvatarReveal({ avatar, go, retake, nav, dispatch, state }) {
   const { SketchyButton, Icon } = window.CC_UI;
-  const arc = window.CC_DATA.archetypes[archetype] || window.CC_DATA.archetypes.Newcomer;
-  const finishRetake = () => {dispatch({ type: 'SET_ARCHETYPE', value: archetype });nav({ name: 'me', sub: 'profile' });};
+  const D = window.CC_DATA;
+  const av = D.avatars[avatar] || D.avatars['Just Getting Started'];
+  const plural = { 'Leading Lion': 'Leading Lions', 'Busy Bee': 'Busy Bees', 'Social Butterfly': 'Social Butterflies', 'Mystical Dragon': 'Mystical Dragons', 'Just Getting Started': 'just getting started' }[av.key];
+
+  // Reorder seeded events so the most relevant to this avatar appears first.
+  const rank = (cat) => { const i = (av.eventCats || []).indexOf(cat); return i === -1 ? 99 : i; };
+  const events = [...D.quizEvents].sort((a, b) => rank(a.category) - rank(b.category));
+
+  const Section = ({ children }) => <div style={{ fontSize: 18, fontWeight: 800, color: '#1F3864', letterSpacing: '-0.01em', margin: '26px 0 12px' }}>{children}</div>;
+
   return (
     <Frame>
-      <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '16px 26px', background: '#FFF4D6', border: '2px solid #D4A017', borderRadius: '14px 18px 14px 19px' }}>
-          <div style={{ width: 54, height: 54, borderRadius: '50%', background: '#D4A017', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="badge" color="#FFF" size={30} /></div>
-          <div style={{ fontSize: 12, color: '#7A5A00', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 800 }}>You're a</div>
-          <div style={{ fontSize: 30, color: '#1F3864', fontWeight: 800, lineHeight: 1.1 }}>{arc.name}</div>
-        </div>
+      {/* Reveal hero */}
+      <div style={{ textAlign: 'center', padding: '20px 18px 22px', background: '#DBE5F1', border: '2px solid #1F3864', borderRadius: '18px 22px 18px 23px / 20px 18px 22px 18px' }}>
+        <div style={{ fontSize: 88, lineHeight: 1, marginBottom: 8 }} aria-hidden="true">{av.emoji}</div>
+        <div style={{ fontSize: 12, color: '#1F3864', textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 800, opacity: 0.7 }}>You're a</div>
+        <div style={{ fontSize: 30, color: '#1F3864', fontWeight: 800, lineHeight: 1.1, marginTop: 4 }}>{av.key}</div>
       </div>
-      <div style={{ fontSize: 15, color: '#222', marginBottom: 18, lineHeight: 1.55 }}>{arc.desc}</div>
-      <div style={{ padding: 14, background: '#DBE5F1', border: '1.8px solid #1F3864', borderRadius: 10, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 800, color: '#1F3864', marginBottom: 8 }}>Based on your answers, here's what we recommend showing you:</div>
-        <div style={{ display: 'grid', gap: 6 }}>
-          {arc.preview.map((p, i) =>
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, color: '#1F3864' }}>
-              <Icon name="check" color="#1F3864" size={15} strokeWidth={2.4} />{p}
-            </div>
-          )}
-        </div>
-      </div>
-      {retake ?
-      <SketchyButton primary onClick={finishRetake} style={{ width: '100%', justifyContent: 'center' }}>Save my archetype</SketchyButton> :
 
-      <SketchyButton primary onClick={() => go('topics')} style={{ width: '100%', justifyContent: 'center' }}>That sounds right</SketchyButton>
-      }
-      <a href="#" onClick={(e) => {e.preventDefault();go('quiz');}} style={{ display: 'block', marginTop: 16, color: '#2E74B5', fontSize: 14, textAlign: 'center' }}>I want to take the quiz again</a>
+      <div style={{ fontSize: 15.5, color: '#222', margin: '18px 0 10px', lineHeight: 1.6, textWrap: 'pretty' }}>{av.desc}</div>
+      <div style={{ fontSize: 13.5, color: '#7A5A00', background: '#FFF4D6', border: '1.5px solid #D4A017', borderRadius: 8, padding: '8px 12px', fontWeight: 600 }}>
+        {av.percent}% of residents are also {plural}.
+      </div>
+
+      {/* Recommended for You */}
+      <Section>Recommended for You</Section>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {av.recs.map((r, i) => (
+          <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: '#FFF', border: '1.5px solid #222', borderRadius: 8 }}>
+            <Icon name="check" color="#1F3864" size={17} strokeWidth={2.4} />
+            <span style={{ fontSize: 14, color: '#222', lineHeight: 1.45 }}>{r}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 12 }}>
+        <SketchyButton onClick={() => go('quiz')} icon="refresh">Retake Quiz</SketchyButton>
+      </div>
+
+      {/* Comparison */}
+      <Section>See How You Compare to Your Fellow Residents</Section>
+      <div style={{ padding: 16, background: '#FFF', border: '1.5px solid #222', borderRadius: 10 }}>
+        <AvatarComparisonChart current={av.key} />
+      </div>
+
+      {/* Upcoming events */}
+      <Section>Upcoming Events</Section>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {events.map(e => <QuizEventCard key={e.id} e={e} />)}
+      </div>
+      <a href="#" onClick={(ev) => { ev.preventDefault(); if (!retake) dispatch({ type: 'FINISH_ONBOARDING' }); nav({ name: 'happening' }); }} style={{ display: 'inline-block', marginTop: 10, color: '#2E74B5', fontSize: 14, fontWeight: 600 }}>See all events →</a>
+
+      {/* Regular meetings */}
+      <Section>Regular Township Meetings</Section>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {D.regularMeetings.map((m, i) => (
+          <div key={i} style={{ padding: '12px 14px', background: '#FFF', border: '1.5px solid #222', borderRadius: 8 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#1F3864' }}>{m.name}</div>
+            <div style={{ fontSize: 12.5, color: '#7A5A00', fontWeight: 600, margin: '2px 0 3px' }}>{m.schedule}</div>
+            <div style={{ fontSize: 13, color: '#595959', lineHeight: 1.4 }}>{m.description}</div>
+          </div>
+        ))}
+      </div>
+      <AddMeetingsLink />
+
+      {/* Stay connected */}
+      <StayConnectedPanel />
+
+      <div style={{ marginTop: 18 }}>
+        {retake ? (
+          <SketchyButton primary onClick={() => nav({ name: 'me', sub: 'profile' })} style={{ width: '100%', justifyContent: 'center' }}>Save my avatar</SketchyButton>
+        ) : (
+          <SketchyButton primary onClick={() => go('engages')} style={{ width: '100%', justifyContent: 'center' }}>Continue to Collier Connect</SketchyButton>
+        )}
+      </div>
     </Frame>);
 
+}
+
+function QuizEventCard({ e }) {
+  const D = window.CC_DATA;
+  const color = D.quizEventCatColors[e.category] || '#1F3864';
+  return (
+    <div style={{ padding: 12, background: '#FFF', border: '1.5px solid #222', borderLeft: `5px solid ${color}`, borderRadius: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, color: color, textTransform: 'uppercase', background: color + '18', borderRadius: 4, padding: '2px 7px' }}>{e.category}</span>
+        <span style={{ fontSize: 12, color: '#595959', fontWeight: 600 }}>{e.date}</span>
+      </div>
+      <div style={{ fontSize: 15.5, fontWeight: 700, color: '#1F3864', lineHeight: 1.2 }}>{e.name}</div>
+      <div style={{ fontSize: 12.5, color: '#595959', margin: '2px 0 5px' }}>{e.time} · {e.location}</div>
+      <div style={{ fontSize: 13, color: '#222', lineHeight: 1.45 }}>{e.description}</div>
+    </div>
+  );
+}
+
+function AddMeetingsLink() {
+  const [added, setAdded] = useOnb(false);
+  return added ? (
+    <div style={{ marginTop: 10, fontSize: 13.5, color: '#548235', fontWeight: 600 }}>✓ Added recurring meetings to your followed items.</div>
+  ) : (
+    <a href="#" onClick={(e) => { e.preventDefault(); setAdded(true); }} style={{ display: 'inline-block', marginTop: 10, color: '#2E74B5', fontSize: 14, fontWeight: 600 }}>Add to my calendar →</a>
+  );
+}
+
+function StayConnectedPanel() {
+  const { state, dispatch } = window.useStore();
+  const on = state.stayConnected;
+  return (
+    <div style={{ marginTop: 26, padding: 16, background: '#FFF4D6', border: '1.8px solid #D4A017', borderRadius: 12 }}>
+      <div style={{ fontSize: 18, fontWeight: 800, color: '#1F3864' }}>Stay Connected</div>
+      <div style={{ fontSize: 13.5, color: '#7A5A00', marginTop: 4, lineHeight: 1.5 }}>Get updates about Collier Township events and news that matter to you.</div>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, cursor: 'pointer' }}>
+        <span onClick={() => dispatch({ type: 'SET_STAY_CONNECTED', value: !on })} style={{ width: 48, height: 28, borderRadius: 999, background: on ? '#1F3864' : '#BFBFBF', position: 'relative', transition: 'background 140ms', flexShrink: 0 }}>
+          <span style={{ position: 'absolute', top: 3, left: on ? 23 : 3, width: 22, height: 22, borderRadius: '50%', background: '#FFF', transition: 'left 140ms', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+        </span>
+        <span style={{ fontSize: 14.5, fontWeight: 600, color: '#222' }}>Send me updates based on my quiz results</span>
+      </label>
+      <div style={{ fontSize: 12, color: '#7A5A00', marginTop: 10, fontStyle: 'italic' }}>You can change this any time in the Me section.</div>
+    </div>
+  );
 }
 
 // ── Phase 2.8 Topics ─────────────────────────────────────────────────────────────
@@ -551,13 +804,15 @@ function EngagesOptIn({ go, dispatch }) {
 }
 
 // ── Phase 3 intro (start tour or skip to celebration) ───────────────────────────────
-function TourIntro({ archetype, dispatch }) {
+function TourIntro({ avatar, dispatch, state }) {
   const { SketchyButton } = window.CC_UI;
-  const arc = window.CC_DATA.archetypes[archetype] || window.CC_DATA.archetypes.Newcomer;
+  const D = window.CC_DATA;
+  const av = D.avatars[avatar] || D.avatars['Just Getting Started'];
+  const archetype = state.archetype; // mapped personalization archetype drives the tour content
   return (
     <Frame>
       <H1>Want a quick tour?</H1>
-      <Sub>About 5 to 7 minutes. We'll walk you through the platform step by step - including how to get to each section yourself - with a few stops picked just for you as a {arc.name}. You can skip anytime.</Sub>
+      <Sub>About 5 to 7 minutes. We'll walk you through the platform step by step - including how to get to each section yourself - with a few stops picked just for you as a {av.key}. You can skip anytime.</Sub>
       <div style={{ marginTop: 16, padding: 14, background: '#DBE5F1', border: '1.8px solid #1F3864', borderRadius: 10, fontSize: 14, color: '#1F3864', lineHeight: 1.5 }}>You'll learn how the response loop works, how to submit a ticket, how to manage your notifications, and how to reach the features that matter most to you - by tapping along as we go.
 
       </div>

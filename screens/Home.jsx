@@ -6,6 +6,8 @@ function Home() {
   const tweaks = window.CC_TWEAKS || {};
   const responseProm = tweaks.responsePromince || 'huge'; // huge | compact | ticker
   const archetype = state.archetype;
+  const avatarKey = state.avatar || (D.archetypeToAvatar && D.archetypeToAvatar[archetype]) || 'Just Getting Started';
+  const avatarObj = D.avatars[avatarKey] || D.avatars['Just Getting Started'];
   const opted = state.engagesOptedIn;
 
   const jtbds = [
@@ -30,7 +32,7 @@ function Home() {
       {/* Greeting */}
       <div style={{ padding: '20px 18px 8px' }}>
         <div style={{ fontSize: 24, fontWeight: 700, color: '#1F3864', lineHeight: 1.2 }}>Hi Jane.</div>
-        <div style={{ fontSize: 14, color: '#595959', marginTop: 2 }}>{state.user.neighborhood} neighborhood · {archetype}</div>
+        <div style={{ fontSize: 14, color: '#595959', marginTop: 2 }}>{state.user.neighborhood} neighborhood · <span aria-hidden="true">{avatarObj.emoji}</span> {avatarKey}</div>
       </div>
 
       {/* Removed-post banner */}
@@ -82,7 +84,7 @@ function Home() {
 
       {/* For You feed */}
       <div style={{ padding: '0 18px' }}>
-        <SectionH sub={`tuned to your archetype: ${archetype.toLowerCase()}`}>For you</SectionH>
+        <SectionH sub={`tuned to your avatar: ${avatarKey}`}>For you</SectionH>
         <div data-tour="foryou" style={{ display: 'grid', gap: 10 }}>
           {forYou.map((item, i) => <ForYouCard key={i} item={item} />)}
         </div>

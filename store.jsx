@@ -24,6 +24,9 @@ function makeInitial() {
     // user
     user: { ...data.user },
     archetype: data.user.archetype,
+    avatar: (data.archetypeToAvatar && data.archetypeToAvatar[data.user.archetype]) || 'Just Getting Started',
+    stayConnected: true,   // "send me updates based on my quiz results" (Stay Connected toggle)
+    quizFeedback: '',      // Q8 open-text, stored anonymously
     digest: data.user.digest,
     smsPref: data.user.smsPref,
     topics: [...data.user.topics],
@@ -259,6 +262,16 @@ function reducer(state, action) {
       const arc = window.CC_DATA.archetypes[action.value];
       return { ...state, archetype: action.value, topics: arc ? arc.topics : state.topics };
     }
+    case 'SET_AVATAR': {
+      // The avatar is the visible identity; it maps to an existing personalization
+      // archetype so the For You feed, tour, and notification mix keep working.
+      const av = window.CC_DATA.avatars[action.value];
+      const mappedArchetype = av ? av.archetype : state.archetype;
+      const arc = window.CC_DATA.archetypes[mappedArchetype];
+      return { ...state, avatar: action.value, archetype: mappedArchetype, topics: arc ? arc.topics : state.topics };
+    }
+    case 'SET_STAY_CONNECTED': return { ...state, stayConnected: action.value };
+    case 'SET_QUIZ_FEEDBACK': return { ...state, quizFeedback: action.value };
     case 'SET_TOPICS': return { ...state, topics: action.value };
     case 'SET_DIGEST': return { ...state, digest: action.value };
     case 'SET_SMS': return { ...state, smsPref: action.value };
