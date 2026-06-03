@@ -61,11 +61,8 @@ const AVATAR_QUIZ = [
     { label: 'Social media discussions', s: { SB: 2, MD: 2 } },
     { label: 'I usually don\u0027t participate', s: { JGS: 4 }, exclusive: true }
   ] },
-  { type: 'dropdown', pct: 88, q: 'What neighborhood do you live in?', placeholder: 'Select your neighborhood...',
-    opts: ['Beechmont', 'Ewingsville', 'Fort Pitt', 'Hickman', 'Kirwan Heights', 'Nevillewood', 'Presto', 'Rennerdale', 'Walkers Mill', 'Prefer not to say'] },
-  { type: 'text', pct: 100, q: 'What would make Collier Township better for you?',
-    placeholder: 'Share your thoughts. This helps the township understand what matters most to you.',
-    note: 'Your response is shared anonymously with township staff.' }
+  { type: 'dropdown', pct: 100, q: 'What neighborhood do you live in?', placeholder: 'Select your neighborhood...',
+    opts: ['Beechmont', 'Ewingsville', 'Fort Pitt', 'Hickman', 'Kirwan Heights', 'Nevillewood', 'Presto', 'Rennerdale', 'Walkers Mill', 'Prefer not to say'] }
 ];
 
 // Highest total wins; ties resolve by this priority order.
@@ -489,7 +486,7 @@ function AvatarQuizFlow({ answers, setAnswers, neighborhood, onDone, go }) {
   const last = idx === AVATAR_QUIZ.length - 1;
   const next = () => {
     if (!last) { setIdx(idx + 1); return; }
-    onDone(scoreQuiz(answers), answers[AVATAR_QUIZ.length - 1] || '');
+    onDone(scoreQuiz(answers));
   };
   const prev = () => { if (idx > 0) setIdx(idx - 1); else go('quizintro'); };
 
@@ -615,50 +612,7 @@ function AvatarReveal({ avatar, go, retake, nav, dispatch, state }) {
         {av.percent}% of residents are also {plural}.
       </div>
 
-      {/* Recommended for You */}
-      <Section>Recommended for You</Section>
-      <div style={{ display: 'grid', gap: 8 }}>
-        {av.recs.map((r, i) => (
-          <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: '#FFF', border: '1.5px solid #222', borderRadius: 8 }}>
-            <Icon name="check" color="#1F3864" size={17} strokeWidth={2.4} />
-            <span style={{ fontSize: 14, color: '#222', lineHeight: 1.45 }}>{r}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: 12 }}>
-        <SketchyButton onClick={() => go('quiz')} icon="refresh">Retake Quiz</SketchyButton>
-      </div>
-
-      {/* Comparison */}
-      <Section>See How You Compare to Your Fellow Residents</Section>
-      <div style={{ padding: 16, background: '#FFF', border: '1.5px solid #222', borderRadius: 10 }}>
-        <AvatarComparisonChart current={av.key} />
-      </div>
-
-      {/* Upcoming events */}
-      <Section>Upcoming Events</Section>
-      <div style={{ display: 'grid', gap: 8 }}>
-        {events.map(e => <QuizEventCard key={e.id} e={e} />)}
-      </div>
-      <a href="#" onClick={(ev) => { ev.preventDefault(); if (!retake) dispatch({ type: 'FINISH_ONBOARDING' }); nav({ name: 'happening' }); }} style={{ display: 'inline-block', marginTop: 10, color: '#2E74B5', fontSize: 14, fontWeight: 600 }}>See all events →</a>
-
-      {/* Regular meetings */}
-      <Section>Regular Township Meetings</Section>
-      <div style={{ display: 'grid', gap: 8 }}>
-        {D.regularMeetings.map((m, i) => (
-          <div key={i} style={{ padding: '12px 14px', background: '#FFF', border: '1.5px solid #222', borderRadius: 8 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#1F3864' }}>{m.name}</div>
-            <div style={{ fontSize: 12.5, color: '#7A5A00', fontWeight: 600, margin: '2px 0 3px' }}>{m.schedule}</div>
-            <div style={{ fontSize: 13, color: '#595959', lineHeight: 1.4 }}>{m.description}</div>
-          </div>
-        ))}
-      </div>
-      <AddMeetingsLink />
-
-      {/* Stay connected */}
-      <StayConnectedPanel />
-
-      <div style={{ marginTop: 18 }}>
+      <div style={{ marginTop: 26 }}>
         {retake ? (
           <SketchyButton primary onClick={() => nav({ name: 'me', sub: 'profile' })} style={{ width: '100%', justifyContent: 'center' }}>Save my avatar</SketchyButton>
         ) : (
